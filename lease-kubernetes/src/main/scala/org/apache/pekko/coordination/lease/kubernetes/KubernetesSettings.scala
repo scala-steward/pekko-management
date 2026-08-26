@@ -53,6 +53,12 @@ private[pekko] object KubernetesSettings {
       apiServerRequestTimeout < leaseTimeoutSettings.operationTimeout,
       "'api-server-request-timeout can not be less than 'lease-operation-timeout'")
 
+    val heartbeatMaxRetries = config.getInt("heartbeat-max-retries")
+    require(heartbeatMaxRetries >= 0, "'heartbeat-max-retries' must not be negative")
+
+    val releaseMaxRetries = config.getInt("release-max-retries")
+    require(releaseMaxRetries >= 0, "'release-max-retries' must not be negative")
+
     val retryConfPath = "token-rotation-retry"
 
     val tokenRetrySettings = new TokenRetrySettings(
@@ -75,7 +81,9 @@ private[pekko] object KubernetesSettings {
       bodyReadTimeout = apiServerRequestTimeout / 2,
       tokenRetrySettings = tokenRetrySettings,
       leaseLabelMaxLength = config.getInt("lease-name-max-length"),
-      onTruncateAddHashLength = config.getInt("on-truncate-add-hash-length"))
+      onTruncateAddHashLength = config.getInt("on-truncate-add-hash-length"),
+      heartbeatMaxRetries = heartbeatMaxRetries,
+      releaseMaxRetries = releaseMaxRetries)
   }
 }
 
@@ -111,4 +119,6 @@ private[pekko] class KubernetesSettings(
       0.3
     ),
     val leaseLabelMaxLength: Int = 63,
-    val onTruncateAddHashLength: Int = 8)
+    val onTruncateAddHashLength: Int = 8,
+    val heartbeatMaxRetries: Int = 3,
+    val releaseMaxRetries: Int = 3)
